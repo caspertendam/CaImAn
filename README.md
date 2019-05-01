@@ -109,7 +109,7 @@ The commands should be run every time before launching python. It is recommended
   Once CaImAn is installed, you may want to get a working directory with code samples and datasets; pip installed a caimanmanager.py command that manages this. If you have not installed Caiman before, follow the following steps.
   First select the folder in which to store your calcium imaging data.
   ```
-  export CAIMAN_DATA = 'home/data_folder'
+  export CAIMAN_DATA=home/data_folder/caiman_example_movies
   ```
   Then run
   ```
