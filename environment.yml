@@ -16,7 +16,7 @@ dependencies:
 - mypy
 - nose
 - numpy
-- opencv
+- opencv-python
 - openpyxl
 - pandas
 - peakutils
