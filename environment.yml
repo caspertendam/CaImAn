@@ -17,6 +17,8 @@ dependencies:
 - nose
 - numpy
 - opencv
+- openpyxl
+- pandas
 - peakutils
 - pims
 - scipy
