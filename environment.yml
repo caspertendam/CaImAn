@@ -16,11 +16,12 @@ dependencies:
 - mypy
 - nose
 - numpy
-- opencv-python
 - openpyxl
 - pandas
 - peakutils
 - pims
+- pip
+  - opencv-python 
 - scipy
 - scikit-image
 - scikit-learn
