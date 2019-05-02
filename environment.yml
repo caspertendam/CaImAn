@@ -27,3 +27,4 @@ dependencies:
 - spyder
 - tifffile
 - tqdm
+- xlrd
