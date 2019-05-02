@@ -20,6 +20,7 @@ dependencies:
 - pandas
 - peakutils
 - pims
+- pip
 - pip:
   - opencv-python 
 - scipy
