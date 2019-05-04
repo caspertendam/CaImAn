@@ -33,7 +33,7 @@ At this point you will want to remove a startup script that visual studio made f
 Now that you have stepped out of the caiman source directory, you are ready to make a data directory with code samples and datasets. You will not use the source tree directory any more. 
 
   ```
-  caimanmanager.py install
+  python caimanmanager.py install
   ```
   or 
   ```
