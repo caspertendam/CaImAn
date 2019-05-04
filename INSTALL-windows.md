@@ -23,9 +23,7 @@ At this point you will want to remove a startup script that visual studio made f
    ```bash
    activate caiman
    pip install . (OR pip install -e . if you want to develop code)
-   copy caimanmanager.py ..
    conda install numba
-   cd ..
    ```
 
 ### Setting up a data directory with caimanmanager
