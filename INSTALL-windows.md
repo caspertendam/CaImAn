@@ -37,7 +37,7 @@ Now that you have stepped out of the caiman source directory, you are ready to m
   ```
   Then run
   ```
-  caimanmanager.py install
+  python caimanmanager.py install
   ```
   or 
   ```
