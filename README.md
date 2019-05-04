@@ -1,5 +1,3 @@
-Hello!
-
 CaImAn
 ======
 <img src="https://github.com/flatironinstitute/CaImAn/blob/master/docs/LOGOS/Caiman_logo_FI.png" width="500" align="right">
