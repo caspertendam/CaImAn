@@ -33,7 +33,7 @@ At this point you will want to remove a startup script that visual studio made f
 Now that you have stepped out of the caiman source directory, you are ready to make a data directory with code samples and datasets. You will not use the source tree directory any more. 
   First select the folder in which to store your calcium imaging data.
   ```
-  export CAIMAN_DATA=home/data_folder/caiman_example_movies
+  set CAIMAN_DATA=home/data_folder/caiman_example_movies
   ```
   Then run
   ```
