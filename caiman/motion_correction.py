@@ -88,7 +88,6 @@ except:
     def profile(a): return a
 #%%
 
-
 class MotionCorrect(object):
     """
         class implementing motion correction operations
@@ -2061,12 +2060,17 @@ def compute_flow_single_frame(frame, templ, pyr_scale=.5, levels=3, winsize=100,
 
 def compute_metrics_motion_correction(fname, final_size_x, final_size_y, swap_dim, pyr_scale=.5, levels=3,
                                       winsize=100, iterations=15, poly_n=5, poly_sigma=1.2 / 5, flags=0,
-                                      play_flow=False, resize_fact_flow=.2, template=None):
+                                      play_flow=False, resize_fact_flow=.2, template=None, save_npz = False):
     #todo: todocument
     # cv2.OPTFLOW_FARNEBACK_GAUSSIAN
     import scipy
     vmin, vmax = -1, 1
-    m = cm.load(fname)
+    if isinstance(fname, str):
+        # If fname is the path to the movie, load the movie
+        m = cm.load(fname)
+    else:
+        # Else fname is an already loaded movie
+        m = fname 
 
     max_shft_x = np.int(np.ceil((np.shape(m)[1] - final_size_x) / 2))
     max_shft_y = np.int(np.ceil((np.shape(m)[2] - final_size_y) / 2))
@@ -2143,8 +2147,10 @@ def compute_metrics_motion_correction(fname, final_size_x, final_size_y, swap_di
         flows.append(flow)
         norms.append(n)
 
-    np.savez(fname[:-4] + '_metrics', flows=flows, norms=norms, correlations=correlations, smoothness=smoothness,
-             tmpl=tmpl, smoothness_corr=smoothness_corr, img_corr=img_corr)
+    if save_npz:
+        np.savez(fname[:-4] + '_metrics', flows=flows, norms=norms, correlations=correlations, smoothness=smoothness,
+                 tmpl=tmpl, smoothness_corr=smoothness_corr, img_corr=img_corr)
+        
     return tmpl, correlations, flows, norms, smoothness
 
 
