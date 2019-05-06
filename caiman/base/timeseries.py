@@ -237,7 +237,7 @@ class timeseries(np.ndarray):
             input_arr = np.reshape(input_arr, (np.prod(dims), T), order='F')
 
             fname_tot = memmap_frames_filename(base_name, dims, T, order)
-            fname_tot = os.path.join(os.path.split(file_name)[0], fname_tot)
+
             big_mov = np.memmap(fname_tot, mode='w+', dtype=np.float32,
                                 shape=(np.uint64(np.prod(dims)), np.uint64(T)), order=order)
 
