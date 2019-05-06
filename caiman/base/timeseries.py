@@ -225,6 +225,7 @@ class timeseries(np.ndarray):
 
         elif extension == '.mmap':
             base_name = name
+            
 
             T = self.shape[0]
             dims = self.shape[1:]
