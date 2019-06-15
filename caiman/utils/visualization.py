@@ -991,7 +991,7 @@ def plot_shapes(Ab, dims, num_comps=15, size=(15, 15), comps_per_row=None,
         ax.axis('off')
     pl.subplots_adjust(0, 0, 1, 1, .06, .06)
 
-def inspect_correlation_pnr(correlation_image_pnr, pnr_image):
+def inspect_correlation_pnr(correlation_image_pnr, pnr_image, min_corr_init = 0, min_pnr_init = 2):
     """
     inspect correlation and pnr images to infer the min_corr, min_pnr
 
@@ -1016,11 +1016,11 @@ def inspect_correlation_pnr(correlation_image_pnr, pnr_image):
     s_cn_max = Slider(pl.axes([0.05, 0.01, 0.35, 0.03]), 'vmax',
                       correlation_image_pnr.min(), correlation_image_pnr.max(), valinit=correlation_image_pnr.max())
     s_cn_min = Slider(pl.axes([0.05, 0.07, 0.35, 0.03]), 'vmin',
-                      correlation_image_pnr.min(), correlation_image_pnr.max(), valinit=correlation_image_pnr.min())
+                      correlation_image_pnr.min(), correlation_image_pnr.max(), valinit=min_corr_init)
     s_pnr_max = Slider(pl.axes([0.5, 0.01, 0.35, 0.03]), 'vmax',
-                       pnr_image.min(), pnr_image.max(), valinit=pnr_image.max())
+                       pnr_image.min(), 20, valinit=20)
     s_pnr_min = Slider(pl.axes([0.5, 0.07, 0.35, 0.03]), 'vmin',
-                       pnr_image.min(), pnr_image.max(), valinit=pnr_image.min())
+                       pnr_image.min(), 20, valinit=min_pnr_init)
 
     def update(val):
         im_cn.set_clim([s_cn_min.val, s_cn_max.val])
@@ -1031,3 +1031,5 @@ def inspect_correlation_pnr(correlation_image_pnr, pnr_image):
     s_cn_min.on_changed(update)
     s_pnr_max.on_changed(update)
     s_pnr_min.on_changed(update)
+    
+    return fig 

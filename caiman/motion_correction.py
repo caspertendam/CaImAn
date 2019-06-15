@@ -130,7 +130,7 @@ class MotionCorrect(object):
            overlaps: tuple
                overlap between pathes (size of patch strides+overlaps)
 
-           pw_rigig: bool, default: False
+           pw_rigid: bool, default: False
                flag for performing motion correction when calling motion_correct
 
            splits_els':list
@@ -235,7 +235,7 @@ class MotionCorrect(object):
             b0 = np.ceil(np.maximum(np.max(np.abs(self.x_shifts_els)),
                                     np.max(np.abs(self.y_shifts_els))))
         else:
-            self.motion_correct_rigid(template=template, save_movie=save_movie)
+            self.motion_correct_rigid(template=template, save_movie=save_movie  )
             b0 = np.ceil(np.max(np.abs(self.shifts_rig)))
         self.border_to_0 = b0.astype(np.int)
         self.mmap_file = self.fname_tot_els if self.pw_rigid else self.fname_tot_rig
@@ -265,7 +265,7 @@ class MotionCorrect(object):
             self.shifts_rig: shifts in x and y per frame
         """
         logging.debug('Entering Rigid Motion Correction')
-        logging.debug(-self.min_mov)  # XXX why the minus?
+        logging.debug(-self.min_mov)  
         self.total_template_rig = template
         self.templates_rig:List = []
         self.fname_tot_rig:List = []
@@ -2060,7 +2060,9 @@ def compute_flow_single_frame(frame, templ, pyr_scale=.5, levels=3, winsize=100,
 
 def compute_metrics_motion_correction(fname, final_size_x, final_size_y, swap_dim, pyr_scale=.5, levels=3,
                                       winsize=100, iterations=15, poly_n=5, poly_sigma=1.2 / 5, flags=0,
-                                      play_flow=False, resize_fact_flow=.2, template=None, save_npz = False):
+                                      play_flow=False, resize_fact_flow=.2, template=None, save_npz = False, 
+                                      one_photon = True, local_correlations = True, crispness = True, 
+                                      correlations = True, optical_flow = True):
     #todo: todocument
     # cv2.OPTFLOW_FARNEBACK_GAUSSIAN
     import scipy
@@ -2087,65 +2089,80 @@ def compute_metrics_motion_correction(fname, final_size_x, final_size_y, swap_di
         logging.info(m.shape)
         logging.warning('Movie contains NaN')
         raise Exception('Movie contains NaN')
+    
+    if local_correlations:
+        logging.debug('Local correlations..')
+        img_corr = m.local_correlations(eight_neighbours=True, swap_dim=swap_dim)
+        logging.debug(m.shape)
+    else:
+        img_corr = None
 
-    logging.debug('Local correlations..')
-    img_corr = m.local_correlations(eight_neighbours=True, swap_dim=swap_dim)
-    logging.debug(m.shape)
     if template is None:
         tmpl = cm.motion_correction.bin_median(m)
     else:
         tmpl = template
 
-    logging.debug('Compute Smoothness.. ')
-    smoothness = np.sqrt(
-        np.sum(np.sum(np.array(np.gradient(np.mean(m, 0)))**2, 0)))
-    smoothness_corr = np.sqrt(
-        np.sum(np.sum(np.array(np.gradient(img_corr))**2, 0)))
+    
+    if crispness:
+        logging.debug('Compute Smoothness.. ')
+        smoothness = np.sqrt(
+            np.sum(np.sum(np.array(np.gradient(np.mean(m, 0)))**2, 0)))
+        smoothness_corr = np.sqrt(
+            np.sum(np.sum(np.array(np.gradient(img_corr))**2, 0)))
+    else:
+        smoothness = None
 
-    logging.debug('Compute correlations.. ')
-    correlations = []
-    count = 0
-    for fr in m:
-        if count % 100 == 0:
-            logging.debug(count)
+    if correlations:
+        logging.debug('Compute correlations.. ')
+        correlations = []
+        count = 0
+        if one_photon:
+            m_compute = m - np.min(m)
+        for fr in m_compute:
+            if count % 100 == 0:
+                logging.debug(f'Frame {count}')
+    
+            count += 1
+            correlations.append(scipy.stats.pearsonr(
+                fr.flatten(), tmpl.flatten())[0])
+    else:
+        correlations = None
 
-        count += 1
-        correlations.append(scipy.stats.pearsonr(
-            fr.flatten(), tmpl.flatten())[0])
-
-    logging.info('Compute optical flow .. ')
-
-    m = m.resize(1, 1, resize_fact_flow)
-    norms = []
-    flows = []
-    count = 0
-    for fr in m:
-        if count % 100 == 0:
-            logging.debug(count)
-
-        count += 1
-        flow = cv2.calcOpticalFlowFarneback(
-            tmpl, fr, None, pyr_scale, levels, winsize, iterations, poly_n, poly_sigma, flags)
-
-        if play_flow:
-            pl.subplot(1, 3, 1)
-            pl.cla()
-            pl.imshow(fr, vmin=0, vmax=300, cmap='gray')
-            pl.title('movie')
-            pl.subplot(1, 3, 3)
-            pl.cla()
-            pl.imshow(flow[:, :, 1], vmin=vmin, vmax=vmax)
-            pl.title('y_flow')
-
-            pl.subplot(1, 3, 2)
-            pl.cla()
-            pl.imshow(flow[:, :, 0], vmin=vmin, vmax=vmax)
-            pl.title('x_flow')
-            pl.pause(.05)
-
-        n = np.linalg.norm(flow)
-        flows.append(flow)
-        norms.append(n)
+    if optical_flow:
+        logging.info('Compute optical flow .. ')
+        m = m.resize(1, 1, resize_fact_flow)
+        norms = []
+        flows = []
+        count = 0
+        for fr in m:
+            if count % 100 == 0:
+                logging.debug(count)
+    
+            count += 1
+            flow = cv2.calcOpticalFlowFarneback(
+                tmpl, fr, None, pyr_scale, levels, winsize, iterations, poly_n, poly_sigma, flags)
+    
+            if play_flow:
+                pl.subplot(1, 3, 1)
+                pl.cla()
+                pl.imshow(fr, vmin=0, vmax=300, cmap='gray')
+                pl.title('movie')
+                pl.subplot(1, 3, 3)
+                pl.cla()
+                pl.imshow(flow[:, :, 1], vmin=vmin, vmax=vmax)
+                pl.title('y_flow')
+    
+                pl.subplot(1, 3, 2)
+                pl.cla()
+                pl.imshow(flow[:, :, 0], vmin=vmin, vmax=vmax)
+                pl.title('x_flow')
+                pl.pause(.05)
+    
+            n = np.linalg.norm(flow)
+            flows.append(flow)
+            norms.append(n)
+    else:
+        flows = norms = None
 
     if save_npz:
         np.savez(fname[:-4] + '_metrics', flows=flows, norms=norms, correlations=correlations, smoothness=smoothness,
